@@ -1,0 +1,379 @@
+---
+title: "ForGraphs"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+  # Preparation
+```{r, include=FALSE}
+library(tidyverse)
+library(cytominer)
+library(RColorBrewer)
+#library(car)
+library("gridExtra")
+library(ggplus)
+library(gganimate)
+library(ggsignif)
+theme_set(theme_minimal())
+cat("\014")
+```
+
+
+# upload data
+```{r}
+data = as_tibble(read.csv("20190408_Data_ALL_Cleaned_final.csv"))
+section1 = ""
+section2 = "Center" # only center sections
+```
+#A TUJ1
+```{r}
+# Sum data 
+variable = "TUJ1"
+feat = "Tuj1ByNuc"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE) %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  mutate(AV= log(mean(value))) %>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(feature==feat)-> Datasub 
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), width=0.6, outlier.shape=NA, lwd=0.5, fatten =1, color="black")+
+  scale_fill_manual(values=c("#2F4F4F", "#882323"),name = "Condition", labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test="wilcox.test",
+             map_signif_level=TRUE) +
+  geom_point(size=1) +
+  
+  ### Labels
+  labs(x="", 
+       y = print(paste0(variable, "+/Nuclei [log px ratio]")), 
+       fill = "Condition", 
+       title = print(variable),
+       subtitle = print(paste0(section1," ",section2)))+
+       
+  ### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.5) ,
+    
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    
+    axis.title.y = element_text(size = 15, face="bold"),
+    axis.text.y = element_text(size=15, color="black"),
+    axis.ticks.y = element_line(),
+    
+    legend.position="right",
+    legend.text = element_text(size = 15) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(1, "cm"),
+    legend.key.width = unit(0.8,"cm"),
+  
+    plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
+    plot.subtitle = element_text(size = 15, hjust=0.5)
+    )-> p
+#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+
+# Statistics
+wilcox.test(AV ~ Condition, data = Datasub)
+
+
+```
+
+
+
+#B MAP2
+```{r}
+# Sum data 
+variable = "MAP2"
+feat = "MAP2ByNuc"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE) %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  mutate(AV= log(mean(value))) %>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(feature==feat) -> Datasub  
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), width=0.6, outlier.shape=NA, lwd=0.5, fatten =1, color="black")+
+  scale_fill_manual(values=c("#2F4F4F", "#882323"),name = "Condition", labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test="wilcox.test", map_signif_level=TRUE) +
+  geom_point(size=1) +
+  scale_y_continuous(limits = c(-1, 2.5)) + 
+  
+  ### Labels
+  labs(x="", 
+       y = print(paste0(variable, "+/Nuclei [log px ratio]")), 
+       fill = "Condition", 
+       title = print(variable),
+       subtitle = print(paste0(section1," ",section2)))+
+       
+  ### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.5) ,
+    
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    
+    axis.title.y = element_text(size = 15, face="bold"),
+    axis.text.y = element_text(size=15, color="black"),
+    axis.ticks.y = element_line(),
+    
+    legend.position="right",
+    legend.text = element_text(size = 15) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(1, "cm"),
+    legend.key.width = unit(0.8,"cm"),
+  
+    plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
+    plot.subtitle = element_text(size = 15, hjust=0.5)
+    )-> p
+#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+
+# Statistics
+wilcox.test(AV ~ Condition, data = Datasub)
+```
+#C TH Percent
+```{r}
+# Sum data 
+variable = "% TH"
+feat = "THPercent"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE)  %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  mutate(AV= mean(value))%>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(feature==feat) -> Datasub  
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), width=0.6, outlier.shape=NA, lwd=0.5, fatten =1, color="black")+
+  scale_fill_manual(values=c("#2F4F4F", "#882323"),name = "Condition", labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test="wilcox.test", 
+             map_signif_level=TRUE) +
+  geom_point(size=1) +
+  
+  #scale_y_continuous(limits = c(0, 100)) + 
+  
+  ### Labels
+  labs(x="", 
+       y = print(paste0("TH+/Perinuclear Mask [%]")), 
+       fill = "Condition", 
+       title = print(variable),
+       subtitle = print(paste0(section1," ",section2)))+
+       
+  ### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.5) ,
+    
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    
+    axis.title.y = element_text(size = 15, face="bold"),
+    axis.text.y = element_text(size=15, color="black"),
+    axis.ticks.y = element_line(),
+    
+    legend.position="right",
+    legend.text = element_text(size = 15) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(1, "cm"),
+    legend.key.width = unit(0.8,"cm"),
+  
+    plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
+    plot.subtitle = element_text(size = 15, hjust=0.5)
+    )-> p
+
+#ggsave(print(paste0("PercentTH", "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+# Statistics
+wilcox.test(AV ~ Condition, data = Datasub)
+```
+
+
+
+#D TH Fragmentation
+```{r}
+# Sum data 
+variable = "TH Fragmentation"
+feat = "THFragmentation"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE)  %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  mutate(AV= log(mean(value))) %>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(feature==feat) -> Datasub  
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), width=0.6, outlier.shape=NA, lwd=0.5, fatten =1, color="black")+
+  scale_fill_manual(values=c("#2F4F4F", "#882323"),name = "Condition", labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test="wilcox.test",
+             map_signif_level=TRUE) +
+  geom_point(size=1) +
+  scale_y_continuous(limits = c(-4, 0.5)) + 
+  
+  ### Labels
+  labs(x="", 
+       y = print(paste0("TH+/TUJ1+/Nuclei [log px ratio]")), 
+       fill = "Condition", 
+       title = print(variable),
+       subtitle = print(paste0(section1," ",section2)))+
+       
+  ### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.5) ,
+    
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    
+    axis.title.y = element_text(size = 15, face="bold"),
+    axis.text.y = element_text(size=15, color="black"),
+    axis.ticks.y = element_line(),
+    
+    legend.position="right",
+    legend.text = element_text(size = 15) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(1, "cm"),
+    legend.key.width = unit(0.8,"cm"),
+  
+    plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
+    plot.subtitle = element_text(size = 15, hjust=0.5)
+    )-> p
+#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+# Statistics 
+wilcox.test(AV ~ Condition, data = Datasub)
+```
+#E TH Nodes
+```{r}
+# Sum data 
+variable = "TH Nodes"
+feat = "Nodes"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE)  %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  mutate(AV= log(mean(value)))%>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(feature==feat) -> Datasub  
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), width=0.6, outlier.shape=NA, lwd=0.5, fatten =1, color="black")+
+  scale_fill_manual(values=c("#2F4F4F", "#882323"),name = "Condition", labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test="wilcox.test",
+             map_signif_level=TRUE) +
+  geom_point(size=1) +
+   #scale_y_continuous(limits = c(7.5, 12.25)) +
+  
+  ### Labels
+  labs(x="", 
+       y = print(paste0("Nodes")), 
+       fill = "Condition", 
+       title = print(variable),
+       subtitle = print(paste0(section1," ",section2)))+
+       
+  ### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.5) ,
+    
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    
+    axis.title.y = element_text(size = 15, face="bold"),
+    axis.text.y = element_text(size=15, color="black"),
+    axis.ticks.y = element_line(),
+    
+    legend.position="right",
+    legend.text = element_text(size = 15) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(1, "cm"),
+    legend.key.width = unit(0.8,"cm"),
+  
+    plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
+    plot.subtitle = element_text(size = 15, hjust=0.5)
+    )-> p
+
+#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+
+# Statistics
+wilcox.test(AV ~ Condition, data = Datasub)
+```
+#F TH Links
+```{r}
+# Sum data 
+variable = "TH Links"
+feat = "Links"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE)  %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  mutate(AV= log(mean(value)))%>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(feature==feat) -> Datasub  
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), width=0.6, outlier.shape=NA, lwd=0.5, fatten =1, color="black")+
+  scale_fill_manual(values=c("#2F4F4F", "#882323"),name = "Condition", labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test="wilcox.test",
+             map_signif_level=TRUE) +
+  geom_point(size=1) +
+   #scale_y_continuous(limits = c(7.5, 12.25)) +
+  
+  ### Labels
+  labs(x="", 
+       y = print(paste0("Nodes")), 
+       fill = "Condition", 
+       title = print(variable),
+       subtitle = print(paste0(section1," ",section2)))+
+       
+  ### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.5) ,
+    
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    
+    axis.title.y = element_text(size = 15, face="bold"),
+    axis.text.y = element_text(size=15, color="black"),
+    axis.ticks.y = element_line(),
+    
+    legend.position="right",
+    legend.text = element_text(size = 15) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(1, "cm"),
+    legend.key.width = unit(0.8,"cm"),
+  
+    plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
+    plot.subtitle = element_text(size = 15, hjust=0.5)
+    )-> p
+
+#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+#Statistics
+wilcox.test(AV ~ Condition, data = Datasub)
+```

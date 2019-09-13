@@ -1,0 +1,243 @@
+---
+title: "Figure S3, 4, 5"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Preparation
+```{r, include=FALSE}
+library(tidyverse)
+library(cytominer)
+library(RColorBrewer)
+library("gridExtra")
+library(ggplus)
+library(ggsignif)
+theme_set(theme_minimal())
+cat("\014")
+```
+
+
+# upload data
+```{r}
+data = as_tibble(read.csv("Data.csv"))
+section1 = "Border"
+section2 = "Center"
+BPColor = c( "#2F4F4F", "#882323")
+
+data <- data %>% dplyr::rename('MAP2+/Nuclei'=MAP2ByNuc, 
+                             'MAP2+/Nuclei alive' = MAP2ByNucAlive,
+                             'MAP2 mask' = MAP2MaskSum, 
+                             'Nuclei alive/Nuclei' = NucAliveByNuc,
+                             'Nuclei dead/Nuclei' = NucDeadByNuc, 
+                             'Nuclei alive mask' = NucMaskAlive,
+                             'Nuclei dead mask' = NucMaskHigh,
+                             'Nuclei mask' = NucMaskSum,
+                             'TH skeleton' = SkelTH,
+                             'TH+/MAP2+' = THByMap2,
+                             'TH+/Nuclei' = THByNuc,
+                             'TH+/Nuclei alive' = THByNucAlive,
+                             'TH+/TUJ1+' = THByTuj1,
+                             'TH fragmentation' = THFragmentation,
+                             'TH mask' = THMaskSum,
+                             'Percentage TH' = THPercent,
+                             'TUJ1+/Nuclei' = Tuj1ByNuc,
+                             'TUJ1+/Nuclei alive' = Tuj1ByNucAlive,
+                             'TUJ1 mask' = Tuj1MaskSum
+                             )
+```
+
+# hMO1
+```{r}
+line = c("hMO1")
+variable = "hMO1"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE) %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  dplyr::mutate(AV= mean(value)) %>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(Cellline==line)-> Datasub 
+
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), 
+               width=0.6, outlier.shape=NA, lwd=0.4, 
+               fatten =1, color="black")+
+  scale_fill_manual(values=BPColor,name = "Condition", 
+                    labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test='wilcox.test',
+              vjust=1.2, size=0.2, textsize=2, map_signif_level=TRUE) +
+  geom_point(size=0.5) +
+  
+### Labels
+  labs(x="",
+       y = print(paste0("Zscore [px ratio, count, percentage]")),
+       fill = "Condition",
+       title = print(variable)
+      # subtitle = "Zscore"
+      )+
+
+### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.1) ,
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.y = element_text(size = 9),
+    axis.text.y = element_text(size=9, color="black"),
+    axis.ticks.y = element_line(),
+    legend.position="right",
+    legend.text = element_text(size = 8) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(0.5, "cm"),
+    legend.key.width = unit(0.4,"cm"),
+    plot.title = element_text(size = 15, hjust=0.5,face = "bold"),
+    plot.subtitle = element_blank()#element_text(size = 2, hjust=0.5)
+    ) +   
+  facet_wrap(~feature, scales="free", ncol="3")  +
+  theme(strip.text = element_text(size=6)) +
+  ggsave(print(paste0(variable, "_", "allFeatures.pdf")), useDingbats = FALSE)
+
+```
+
+
+
+
+# hMO2
+```{r}
+line = c("hMO2")
+variable = "hMO2"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE) %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  dplyr::mutate(AV= mean(value)) %>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(Cellline==line)-> Datasub 
+
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), 
+               width=0.6, outlier.shape=NA, lwd=0.4, 
+               fatten =1, color="black")+
+  scale_fill_manual(values=BPColor,name = "Condition", 
+                    labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test='wilcox.test',
+              vjust=1.2, size=0.2, textsize=2, map_signif_level=TRUE) +
+  geom_point(size=0.5) +
+  
+### Labels
+  labs(x="",
+       y = print(paste0("Zscore [px ratio, count, percentage]")),
+       fill = "Condition",
+       title = print(variable)
+      # subtitle = "Zscore"
+      )+
+
+### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.1) ,
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.y = element_text(size = 9),
+    axis.text.y = element_text(size=9, color="black"),
+    axis.ticks.y = element_line(),
+    legend.position="right",
+    legend.text = element_text(size = 8) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(0.5, "cm"),
+    legend.key.width = unit(0.4,"cm"),
+    plot.title = element_text(size = 15, hjust=0.5,face = "bold"),
+    plot.subtitle = element_blank()#element_text(size = 2, hjust=0.5)
+    ) +   
+  facet_wrap(~feature, scales="free", ncol="3")  +
+  theme(strip.text = element_text(size=6)) +
+  ggsave(print(paste0(variable, "_", "allFeatures.pdf")), useDingbats = FALSE)
+
+```
+
+
+
+# hMO3
+```{r}
+line = c("hMO3")
+variable = "hMO3"
+
+data %>%
+  gather(feature, value, 11:ncol(data), na.rm = TRUE) %>%
+  group_by(Experiment, Cellline, Section, Condition, Replicate, feature)  %>%
+  dplyr::mutate(AV= mean(value)) %>% 
+  filter(Condition==c("CTRL") | Condition==c("6OHDA"))%>%
+  filter(Section %in% c(section1, section2)) %>%
+  droplevels() %>%
+  select(Experiment, Cellline, Section, Condition, Replicate, feature, AV) %>%
+  unique() %>%
+  filter(Cellline==line)-> Datasub 
+
+Datasub %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=AV) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), 
+               width=0.6, outlier.shape=NA, lwd=0.4, 
+               fatten =1, color="black")+
+  scale_fill_manual(values=BPColor,name = "Condition", 
+                    labels = c("Control", "175uM 6-OHDA"))+
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test='wilcox.test',
+              vjust=1.2, size=0.2, textsize=2, map_signif_level=TRUE) +
+  geom_point(size=0.5) +
+  
+### Labels
+  labs(x="",
+       y = print(paste0("Zscore [px ratio, count, percentage]")),
+       fill = "Condition",
+       title = print(variable)
+      # subtitle = "Zscore"
+      )+
+
+### Theme
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.1) ,
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.y = element_text(size = 9),
+    axis.text.y = element_text(size=9, color="black"),
+    axis.ticks.y = element_line(),
+    legend.position="right",
+    legend.text = element_text(size = 8) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(0.5, "cm"),
+    legend.key.width = unit(0.4,"cm"),
+    plot.title = element_text(size = 15, hjust=0.5,face = "bold"),
+    plot.subtitle = element_blank()#element_text(size = 2, hjust=0.5)
+    ) +   
+  facet_wrap(~feature, scales="free", ncol="3")  +
+  theme(strip.text = element_text(size=6)) +
+  ggsave(print(paste0(variable, "_", "allFeatures.pdf")), useDingbats = FALSE)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

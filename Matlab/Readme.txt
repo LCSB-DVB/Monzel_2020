@@ -1,0 +1,3 @@
+ImageStitching_ImageAnalysis:	Stitching of area scans (obtained from Operetta as single TIFFs) and image analysis of the stitched images. The output file "objects.csv" contains the measurements.
+ImageStitching:			Stitching of area scans (obtained from Operetta as single TIFFs), stored as .mat files.
+ImageAnalysis:			Image analysis of the stitched images. Loads the .mat files and runs the analysis. The output file "objects.csv" contains the measurements.

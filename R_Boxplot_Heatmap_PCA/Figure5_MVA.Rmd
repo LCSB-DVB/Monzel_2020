@@ -1,0 +1,467 @@
+---
+title: "Figure 5"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+  # Preparation
+```{r, include=FALSE}
+library(tidyverse)
+library(cytominer)
+library(RColorBrewer)
+library("gridExtra")
+library(ggplus)
+library(ggsignif)
+library(ComplexHeatmap)
+theme_set(theme_minimal())
+library("ggbiplot")
+cat("\014")
+BPColor     <- c( "#2F4F4F", "#882323")
+```
+
+
+# upload data
+```{r}
+data = as_tibble(read.csv("Data.csv"), colnames=TRUE)
+data = data %>% filter(Condition %in% c("CTRL", "6OHDA"))
+```
+
+
+# a) Heatmaps
+## i) Heatmap raw
+```{r}
+#########################
+        # Preparation # 
+#########################
+DataHM   <- data %>%
+              gather(feature, value, (1+which(colnames(data) == "Section" )):ncol(data), na.rm=TRUE) %>% # "Section" is the last column of the metadata. You can change it accordingly.
+              group_by(Cellline, Condition, Section,  feature) %>%
+              dplyr::mutate(av = mean(value)) %>%
+              select(c(Condition, Section, Cellline,  feature, av)) %>%
+              unique() %>%
+              spread(feature, av)  %>%
+              unite(Group, Condition, Section,Cellline,   remove=FALSE, sep=" ")%>%
+              column_to_rownames("Group")
+
+metadata = DataHM[,1:which(colnames(DataHM) == "Cellline")] # Now "cellline" is the last column of the metadata. 
+exprs    = DataHM[,(which(colnames(DataHM) == "Cellline")+1):ncol(DataHM)]
+exprs = exprs[,order(colnames(exprs))]
+exprs = scale(exprs)
+exprs = t(exprs)
+
+.rowNamesDF(exprs, make.names=FALSE) <- c("Links", "MAP2+/Nuclei", "MAP2+/Nuclei alive", "MAP2 mask", "Nodes", "Nuclei alive/Nuclei", "Nuclei dead/Nuclei", 
+                                         "Nuclei alive mask", "Nuclei dead mask", "Nuclei mask", "TH skeleton", "TH+/MAP2+", "TH+/Nuclei", "TH+/Nuclei alive",
+                                         "TH+/TUJ1+", "TH fragmentation", "TH mask", "Percentage TH", "TUJ1+/Nuclei", "TUJ1+/Nuclei alive", "TUJ1 mask")
+exprs = exprs[order(rownames(exprs)),]
+na_if(exprs,  Inf) -> exprs
+na_if(exprs, -Inf) -> exprs
+
+fact.cols     = list(
+    Condition    = c("CTRL" = "darkgreen", 
+                     "6OHDA" = "darkred"),
+    Cellline     = c("hMO1"= "navajowhite", 
+                     "hMO2"="midnightblue", 
+                     "hMO3"="palegreen1"),
+    Section = c("Border" = "tan2", "Center" = "darkseagreen4")
+)
+
+# Top annotation
+ha = HeatmapAnnotation(
+        metadata[,c("Condition","Cellline", "Section")],
+        col = fact.cols,
+        show_annotation_name = T,
+        show_legend =  T,
+        annotation_name_side = "left",
+        annotation_name_gp = gpar(fontsize = 9),
+        annotation_name_offset = unit(0.3, "mm")
+        )
+col <- colorRampPalette(brewer.pal(10, "RdYlBu"))(256)
+# Clustering Columns
+distance    = dist(t(as.matrix(exprs)), method="euclidean" )
+cluster     = hclust(distance, method="ward.D2")
+
+#########################
+        # Heatmap # 
+#########################
+
+HM1 <- Heatmap(exprs, 
+name = "Color key", # legend title
+rect_gp = gpar(col = "black"), 
+col = col,
+
+#Row annotation configurations
+cluster_rows=F,
+row_title="Features",
+row_title_side="left",
+row_title_gp=gpar(fontsize=10, fontface="bold"),
+row_title_rot=90,
+show_row_names=TRUE,
+row_names_side="left",
+row_names_gp = gpar(col = "black",fontsize = 8,fontface = "italic"),  #
+
+#Column annotation configuratiions
+cluster_columns=cluster,
+column_title_side="top",
+column_title_gp=gpar(fontsize=10, fontface="bold"),
+show_column_names=F,
+column_names_gp=gpar(fontsize=14),
+show_column_dend=TRUE,
+column_dend_height=unit(30,"mm"),
+
+#Annotations
+top_annotation_height=unit(1.5,"cm"),
+top_annotation=ha)
+
+#pdf("Figure4_FeatureHM_cluster.pdf")
+draw(HM1)
+#dev.off()
+```
+
+
+## ii) Heatmap Normalization
+```{r}
+
+#########################
+        # Preparation # 
+#########################
+Norm_over <- c("Section", "Cellline", "Experiment")
+Norm_to   <- c("CTRL", "6OHDA")   # decide if you want to filter over the whole population or just ctrls
+
+strata      <- Norm_over
+sample      <- data%>% dplyr::filter(Condition %in% Norm_to )
+vars      <- make.names(colnames(data[,(1+which(colnames(data) == "Section" )):ncol(data)]))
+data_norm <- cytominer::normalize(data, vars, strata, sample, operation = "standardize") 
+
+
+
+
+
+DataHM   <- data_norm %>%
+              gather(feature, value, (1+which(colnames(data) == "Section" )):ncol(data), na.rm=TRUE) %>%
+              group_by(Cellline, Condition, Section,  feature) %>%
+              dplyr::mutate(av = mean(value)) %>%
+              select(c(Condition, Section, Cellline,  feature, av)) %>%
+              unique() %>%
+              spread(feature, av)  %>%
+              #mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>%
+              unite(Group, Condition, Section,Cellline,   remove=FALSE, sep=" ")%>%
+              column_to_rownames("Group")
+
+metadata = DataHM[,1:which(colnames(DataHM) == "Cellline")]
+exprs    = DataHM[,(which(colnames(DataHM) == "Cellline")+1):ncol(DataHM)]
+exprs = exprs[,order(colnames(exprs))]
+exprs = scale(exprs)
+exprs = t(exprs)
+
+.rowNamesDF(exprs, make.names=FALSE) <- c("Links", "MAP2+/Nuclei", "MAP2+/Nuclei alive", "MAP2 mask", "Nodes", "Nuclei alive/Nuclei", "Nuclei dead/Nuclei", 
+                                         "Nuclei alive mask", "Nuclei dead mask", "Nuclei mask", "TH skeleton", "TH+/MAP2+", "TH+/Nuclei", "TH+/Nuclei alive",
+                                         "TH+/TUJ1+", "TH fragmentation", "TH mask", "Percentage TH", "TUJ1+/Nuclei", "TUJ1+/Nuclei alive", "TUJ1 mask")
+exprs = exprs[order(rownames(exprs)),]
+na_if(exprs,  Inf) -> exprs
+na_if(exprs, -Inf) -> exprs
+
+fact.cols     = list(
+    Condition    = c("CTRL" = "darkgreen", 
+                     "6OHDA" = "darkred"),
+    Cellline     = c("hMO1"= "navajowhite", 
+                     "hMO2"="midnightblue", 
+                     "hMO3"="palegreen1"),
+    Section = c("Border" = "tan2", "Center" = "darkseagreen4")
+)
+
+#Top annotation
+ha = HeatmapAnnotation(
+        metadata[,c("Condition","Cellline", "Section")],
+        col = fact.cols,
+        show_annotation_name = T,
+        show_legend =  T,
+        annotation_name_side = "left",
+        annotation_name_gp = gpar(fontsize = 9),
+        annotation_name_offset = unit(0.3, "mm")
+        )
+col <- colorRampPalette(brewer.pal(10, "RdYlBu"))(256)
+# Clustering Columns
+distance    = dist(t(as.matrix(exprs)), method="euclidean" )
+cluster     = hclust(distance, method="ward.D2")
+
+#########################
+        # Heatmap # 
+#########################
+
+HM1 <- Heatmap(exprs, 
+name = "Color key", # legend title
+rect_gp = gpar(col = "black"), 
+col = col,
+
+#Row annotation configurations
+cluster_rows=F,
+row_title="Features",
+row_title_side="left",
+row_title_gp=gpar(fontsize=10, fontface="bold"),
+row_title_rot=90,
+show_row_names=TRUE,
+row_names_side="left",
+row_names_gp = gpar(col = "black",fontsize = 8,fontface = "italic"),  #
+
+#Column annotation configuratiions
+cluster_columns=cluster,
+column_title_side="top",
+column_title_gp=gpar(fontsize=10, fontface="bold"),
+show_column_names=F,
+column_names_gp=gpar(fontsize=14),
+show_column_dend=TRUE,
+column_dend_height=unit(30,"mm"),
+
+#Annotations
+top_annotation_height=unit(1.5,"cm"),
+top_annotation=ha)
+
+#pdf("Figure5_FeatureHM_ESC_Norm_cluster.pdf")
+draw(HM1)
+#dev.off()
+```
+
+
+
+
+
+
+
+# b) Principal component analysis
+## i) PCA Scaled Raw data
+
+```{r}
+## Data preparation
+staining <- data %>%  
+              gather(feature, value, (1+which(colnames(data) == "Section" )):ncol(data), na.rm=TRUE) %>%
+              filter(Condition %in% c("CTRL", "6OHDA")) %>%
+              group_by(Cellline, Condition, Experiment, Replicate, feature) %>% 
+              dplyr::mutate(av = mean(value)) %>%
+              ungroup() %>%
+              select(c(Condition, Experiment, Replicate, Cellline, feature, av)) %>%
+              unique() %>%
+              as.data.frame()
+## Boxplot Quality control
+staining %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=av) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), 
+               width=0.8, outlier.shape=NA, lwd=0.4, 
+               fatten =1, color="black")+
+  scale_fill_manual(values=BPColor,name = "Condition", 
+                    labels = c("Control", "6OHDA"))+  
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test='wilcox.test',
+              vjust=1.6, size=0.2, textsize=2, map_signif_level=TRUE) +
+  geom_point(aes(col=Cellline), size=0.3, position = position_jitterdodge(dodge.width = 0.75, seed = NA) ) +
+  facet_wrap(~feature, scales="free")  +
+  labs(x="",
+       y = print(paste0(" [px ratio, count]")),
+       fill = "Condition"
+      )+
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.1) ,
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.y = element_text(size = 9),
+    axis.text.y = element_text(size=9, color="black"),
+    axis.ticks.y = element_line(),
+    legend.position="right",
+    legend.text = element_text(size = 8) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(0.5, "cm"),
+    legend.key.width = unit(0.4,"cm"),
+    plot.title = element_text(size = 15, hjust=0.5,face = "bold"),
+    plot.subtitle = element_blank(),
+    strip.text = element_text(size=6, vjust=2), 
+    strip.background = element_blank(), 
+    panel.spacing.y = unit(0.8, "lines"),
+    strip.switch.pad.wrap=unit(5, "lines")
+    ) -> p
+p
+
+
+## PCA
+mydata <- as.data.frame(staining)
+mydata <- mydata %>% spread(feature, av)  
+na_if(mydata,  Inf) -> mydata
+na_if(mydata, -Inf) -> mydata
+mydata <- mydata[,colSums(is.na(mydata)) == 0] 
+
+### rename feature names 
+colnames(mydata) <-paste( c("Condition", "Experiment", "Cellline","Links", "MAP2+/Nuclei", "MAP2+/Nuclei alive", "MAP2 mask", "Nodes", "Nuclei alive/Nuclei", "Nuclei dead/Nuclei", 
+                                         "Nuclei alive mask", "Nuclei dead mask", "Nuclei mask", "TH skeleton", "TH+/MAP2+", "TH+/Nuclei", "TH+/Nuclei alive",
+                                         "TH+/TUJ1+", "TH fragmentation", "TH mask", "Percentage TH", "TUJ1+/Nuclei", "TUJ1+/Nuclei alive", "TUJ1 mask"))
+
+
+pca <- prcomp(mydata[,5:ncol(mydata)], scale=T, center=T)
+summary(pca)
+str(pca)
+
+### PCA without variable names
+#pdf("PCA_MitoPheno2D_Staining3D.pdf", useDingbats = FALSE)
+plot(pca$x[,1],pca$x[,2]) # make a scatterplot
+text(pca$x[,1],pca$x[,2], mydata$Condition, cex=0.7, pos=4, col="red") # add labels
+#dev.off()
+
+### PCA with variable names
+#pdf("PCA_Raw_with_varnames.pdf", useDingbats = FALSE, width = unit(10, "cm"))
+g <- ggbiplot(pca,  ellipse=TRUE, circle=TRUE, choices=c(1,2), labels.size = 2, varname.size	 = 2,varname.adjust=40,varname.abbrev=F,  groups=mydata$Condition)
+g <- g + xlim(c(-2.5, 2)) + ylim(c(-2.5, 2.5)) +
+  labs(title = "Raw",
+       color = "Condition"
+      )+
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.5) ,
+    axis.title.x = element_text(size = 9),
+    axis.text.x = element_text(size=9, color="black"),
+    axis.title.y = element_text(size = 9),
+    axis.text.y = element_text(size=9, color="black"),
+    axis.ticks.y = element_line(),
+    legend.position="right",
+    legend.text = element_text(size = 8) ,
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.5, "cm"),
+    legend.key.width = unit(0.4,"cm"),
+    plot.title = element_text(size = 15, hjust=0.5,face = "bold"),
+    plot.subtitle = element_blank(),#element_text(size = 2, hjust=0.5)
+    strip.text = element_text(size=6, vjust=2), 
+    strip.background = element_blank(), 
+    panel.spacing.y = unit(0.8, "lines"),
+    strip.switch.pad.wrap=unit(5, "lines")
+    ) 
+g
+#dev.off()
+
+```
+
+***
+
+
+
+
+***
+
+## ii) PCA Norm data Section, Cellline, Experiment
+
+```{r}
+## Data preparation
+Norm_over <- c("Section", "Cellline", "Experiment")
+Norm_to   <- c("CTRL", "6OHDA")   # decide if you want to filter over the whole population or just ctrls
+
+strata      <- Norm_over
+sample      <- data%>% dplyr::filter(Condition %in% Norm_to )
+vars      <- make.names(colnames(data[,(1+which(colnames(data) == "Section" )):ncol(data)]))
+data_norm <- cytominer::normalize(data, vars, strata, sample, operation = "standardize") 
+
+staining <- data_norm %>%  
+              gather(feature, value, (1+which(colnames(data_norm) == "Section" )):ncol(data_norm), na.rm=TRUE) %>%
+              filter(Condition %in% c("CTRL", "6OHDA")) %>%
+              group_by(Cellline, Condition, Experiment, feature) %>% 
+              dplyr::mutate(av = mean(value)) %>%
+              ungroup() %>%
+              select(c(Condition, Experiment, Replicate, Cellline, feature, av)) %>%
+              unique() %>%
+              as.data.frame()
+
+
+## Boxplot Quality control
+staining %>% 
+  ggplot(aes(x=fct_relevel(Condition, "CTRL",  "6OHDA"), y=av) ) +
+  geom_boxplot(aes(fill=fct_relevel(Condition, "CTRL",  "6OHDA")), 
+               width=0.8, outlier.shape=NA, lwd=0.4, 
+               fatten =1, color="black")+
+  scale_fill_manual(values=BPColor,name = "Condition", 
+                    labels = c("Control", "6OHDA"))+  
+  geom_signif(comparisons = list(c("CTRL", "6OHDA")), test='wilcox.test',
+              vjust=1.6, size=0.2, textsize=2, map_signif_level=TRUE) +
+  geom_point(aes(col=Cellline), size=0.3, position = position_jitterdodge(dodge.width = 0.75, seed = NA) ) +
+  facet_wrap(~feature, scales="free")  +
+  
+  labs(x="",
+       y = print(paste0(" [px ratio, count]")),
+       fill = "Condition"
+      )+
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.1) ,
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.y = element_text(size = 9),
+    axis.text.y = element_text(size=9, color="black"),
+    axis.ticks.y = element_line(),
+    legend.position="right",
+    legend.text = element_text(size = 8) ,
+    legend.title = element_blank(),
+    legend.key.size = unit(0.5, "cm"),
+    legend.key.width = unit(0.4,"cm"),
+    plot.title = element_text(size = 15, hjust=0.5,face = "bold"),
+    plot.subtitle = element_blank(),
+    strip.text = element_text(size=6, vjust=2), 
+    strip.background = element_blank(), 
+    panel.spacing.y = unit(0.8, "lines"),
+    strip.switch.pad.wrap=unit(5, "lines")
+    ) -> p
+p
+
+
+## PCA
+mydata <- as.data.frame(staining)
+mydata <- mydata %>% spread(feature, av)  
+na_if(mydata,  Inf) -> mydata # remove any Infinity values
+na_if(mydata, -Inf) -> mydata
+mydata <- mydata[,colSums(is.na(mydata)) == 0] 
+
+
+### rename feature names 
+colnames(mydata) <-paste( c("Condition", "Experiment", "Cellline","Links", "MAP2+/Nuclei", "MAP2+/Nuclei alive", "MAP2 mask", "Nodes", "Nuclei alive/Nuclei", "Nuclei dead/Nuclei", 
+                                         "Nuclei alive mask", "Nuclei dead mask", "Nuclei mask", "TH skeleton", "TH+/MAP2+", "TH+/Nuclei", "TH+/Nuclei alive",
+                                         "TH+/TUJ1+", "TH fragmentation", "TH mask", "Percentage TH", "TUJ1+/Nuclei", "TUJ1+/Nuclei alive", "TUJ1 mask"))
+
+
+pca <- prcomp(mydata[,5:ncol(mydata)], scale=T, center=T)
+summary(pca)
+str(pca)
+
+
+### PCA without variable names
+#pdf("PCA_MitoPheno2D_Staining3D.pdf", useDingbats = FALSE)
+plot(pca$x[,1],pca$x[,2]) # make a scatterplot
+text(pca$x[,1],pca$x[,2], mydata$Condition, cex=0.7, pos=4, col="red") # add labels
+#dev.off()
+
+
+### PCA with variable names
+#pdf("PCA_ESC_Norm_with_varnames.pdf", useDingbats = FALSE, width = unit(10, "cm"))
+g <- ggbiplot(pca,  ellipse=TRUE, circle=TRUE, choices=c(1,2), labels.size = 0, varname.size	 = 0,varname.adjust=40,varname.abbrev=F,  groups=mydata$Condition)
+g <- g + xlim(c(-2, 2)) + ylim(c(-2.5, 2.5)) +
+  labs(title = "ECS",
+       color = "Condition"
+      )+
+  theme(
+    axis.line = element_line(colour = 'black', size = 0.5) ,
+    axis.title.x = element_text(size = 9),
+    axis.text.x = element_text(size=9, color="black"),
+    axis.title.y = element_text(size = 9),
+    axis.text.y = element_text(size=9, color="black"),
+    axis.ticks.y = element_line(),
+    legend.position="right",
+    legend.text = element_text(size = 8) ,
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.5, "cm"),
+    legend.key.width = unit(0.4,"cm"),
+    plot.title = element_text(size = 15, hjust=0.5,face = "bold"),
+    plot.subtitle = element_blank(),#element_text(size = 2, hjust=0.5)
+    strip.text = element_text(size=6, vjust=2), 
+    strip.background = element_blank(), 
+    panel.spacing.y = unit(0.8, "lines"),
+    strip.switch.pad.wrap=unit(5, "lines")
+    ) 
+g
+#dev.off()
+
+```
+
+***
+
+

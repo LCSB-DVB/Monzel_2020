@@ -1,0 +1,12 @@
+1 T12.9_Rep2_6OHDA_NAC_Center
+2 T12.9_Rep2_6OHDA_NAC_Border
+3 T12.9_Rep2_6OHDA_NAC_Center
+4 T12.9_Rep2_6OHDA_NAC_Border
+5 T12.9_Rep2_6OHDA_Center
+6 T12.9_Rep2_6OHDA_Border
+7 T12.9_Rep2_CTRL_NAC_Center
+8 T12.9_Rep2_6OHDA_Border
+9 T12.9_Rep2_CTRL_NAC_Center
+10 T12.9_Rep2_CTRL_NAC_Border
+11 T12.9_Rep2_CTRL_Center
+12 T12.9_Rep2_CTRL_Border

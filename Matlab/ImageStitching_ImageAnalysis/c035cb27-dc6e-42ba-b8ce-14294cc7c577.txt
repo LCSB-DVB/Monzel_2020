@@ -1,0 +1,12 @@
+1 K7_Rep2_6OHDA_NAC_Center1
+2 K7_Rep1_CTRL_NAC_Center1
+3 K7_Rep2_6OHDA_NAC_Center1
+4 K7_Rep1_CTRL_NAC_Center1
+5 K7_Rep2_6OHDA_Center1
+6 K7_Rep2_6OHDA_NAC_Border2
+7 K7_Rep1_6OHDA_NAC_Border1
+8 K7_Rep2_6OHDA_Center1
+9 K7_Rep1_6OHDA_NAC_Border1
+10 K7_Rep2_CTRL_Center1
+11 K7_Rep1_6OHDA_Border1
+12 K7_Rep2_CTRL_NAC_Border2
