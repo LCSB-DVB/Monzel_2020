@@ -300,14 +300,12 @@ summary(pca)
 str(pca)
 
 ### PCA without variable names
-#pdf("PCA_MitoPheno2D_Staining3D.pdf", useDingbats = FALSE)
 plot(pca$x[,1],pca$x[,2]) # make a scatterplot
 text(pca$x[,1],pca$x[,2], mydata$Condition, cex=0.7, pos=4, col="red") # add labels
-#dev.off()
 
 ### PCA with variable names
 #pdf("PCA_Raw_with_varnames.pdf", useDingbats = FALSE, width = unit(10, "cm"))
-g <- ggbiplot(pca,  ellipse=TRUE, circle=TRUE, choices=c(1,2), labels.size = 2, varname.size	 = 2,varname.adjust=40,varname.abbrev=F,  groups=mydata$Condition)
+g <- ggbiplot(pca,  ellipse=TRUE, circle=FALSE, choices=c(1,2), labels.size = 2, varname.size	 = 2,varname.adjust=40,varname.abbrev=F,  groups=mydata$Condition)
 g <- g + xlim(c(-2.5, 2)) + ylim(c(-2.5, 2.5)) +
   labs(title = "Raw",
        color = "Condition"
@@ -425,7 +423,6 @@ str(pca)
 
 
 ### PCA without variable names
-#pdf("PCA_MitoPheno2D_Staining3D.pdf", useDingbats = FALSE)
 plot(pca$x[,1],pca$x[,2]) # make a scatterplot
 text(pca$x[,1],pca$x[,2], mydata$Condition, cex=0.7, pos=4, col="red") # add labels
 #dev.off()
@@ -433,7 +430,7 @@ text(pca$x[,1],pca$x[,2], mydata$Condition, cex=0.7, pos=4, col="red") # add lab
 
 ### PCA with variable names
 #pdf("PCA_ESC_Norm_with_varnames.pdf", useDingbats = FALSE, width = unit(10, "cm"))
-g <- ggbiplot(pca,  ellipse=TRUE, circle=TRUE, choices=c(1,2), labels.size = 0, varname.size	 = 0,varname.adjust=40,varname.abbrev=F,  groups=mydata$Condition)
+g <- ggbiplot(pca,  ellipse=TRUE, circle=FALSE, choices=c(1,2), labels.size = 0, varname.size	 = 0,varname.adjust=40,varname.abbrev=F,  groups=mydata$Condition)
 g <- g + xlim(c(-2, 2)) + ylim(c(-2.5, 2.5)) +
   labs(title = "ECS",
        color = "Condition"
