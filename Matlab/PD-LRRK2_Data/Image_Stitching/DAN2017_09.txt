@@ -1,0 +1,7 @@
+1	A13Mut_p5_d35
+2	A13Mut_p5_d35
+3	A13Mut_p7_d35
+4	A13WT_p5_d35
+5	A13WT_p7_d35
+6	A13WT_p7_d35
+7	A13WT_p7_d35

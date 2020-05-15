@@ -1,5 +1,5 @@
 ---
-title: "ForGraphs"
+title: "Figure 1"
 output: html_document
 ---
 
@@ -10,12 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
   # Preparation
 ```{r, include=FALSE}
 library(tidyverse)
-library(cytominer)
 library(RColorBrewer)
-#library(car)
 library("gridExtra")
-library(ggplus)
-library(gganimate)
 library(ggsignif)
 theme_set(theme_minimal())
 cat("\014")
@@ -24,7 +20,7 @@ cat("\014")
 
 # upload data
 ```{r}
-data = as_tibble(read.csv("20190408_Data_ALL_Cleaned_final.csv"))
+data = as_tibble(read.csv("Data.csv"))
 section1 = ""
 section2 = "Center" # only center sections
 ```
@@ -79,7 +75,7 @@ Datasub %>%
     plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
     plot.subtitle = element_text(size = 15, hjust=0.5)
     )-> p
-#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+#ggsave(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf"), height =5, width =6, useDingbats = FALSE)
 
 # Statistics
 wilcox.test(AV ~ Condition, data = Datasub)
@@ -140,7 +136,7 @@ Datasub %>%
     plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
     plot.subtitle = element_text(size = 15, hjust=0.5)
     )-> p
-#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+#ggsave(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf"), height =5, width =6, useDingbats = FALSE)
 
 # Statistics
 wilcox.test(AV ~ Condition, data = Datasub)
@@ -199,7 +195,7 @@ Datasub %>%
     plot.subtitle = element_text(size = 15, hjust=0.5)
     )-> p
 
-#ggsave(print(paste0("PercentTH", "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+#ggsave(paste0("PercentTH", "_", section1,"_", section2, "_Boxplot.pdf"), height =5, width =6, useDingbats = FALSE)
 # Statistics
 wilcox.test(AV ~ Condition, data = Datasub)
 ```
@@ -258,7 +254,7 @@ Datasub %>%
     plot.title = element_text(size = 20, hjust=0.5,face = "bold"),
     plot.subtitle = element_text(size = 15, hjust=0.5)
     )-> p
-#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+#ggsave(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf"), height =5, width =6, useDingbats = FALSE)
 # Statistics 
 wilcox.test(AV ~ Condition, data = Datasub)
 ```
@@ -315,7 +311,7 @@ Datasub %>%
     plot.subtitle = element_text(size = 15, hjust=0.5)
     )-> p
 
-#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+#ggsave(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf"), height =5, width =6, useDingbats = FALSE)
 
 # Statistics
 wilcox.test(AV ~ Condition, data = Datasub)
@@ -373,7 +369,7 @@ Datasub %>%
     plot.subtitle = element_text(size = 15, hjust=0.5)
     )-> p
 
-#ggsave(print(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf")), height =5, width =6, useDingbats = FALSE)
+#ggsave(paste0(variable, "_", section1,"_", section2, "_Boxplot.pdf"), height =5, width =6, useDingbats = FALSE)
 #Statistics
 wilcox.test(AV ~ Condition, data = Datasub)
 ```

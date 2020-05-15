@@ -10,14 +10,14 @@ knitr::opts_chunk$set(echo = TRUE)
   # Preparation
 ```{r, include=FALSE}
 library(tidyverse)
-library(cytominer)
+library(cytominer) ## Source: https://github.com/cytomining/cytominer
 library(RColorBrewer)
-library("gridExtra")
-library(ggplus)
+library(gridExtra)
+library(ggplus) ## Source: https://github.com/guiastrennec/ggplus 
 library(ggsignif)
-library(ComplexHeatmap)
+library(ComplexHeatmap) ## Source: https://github.com/jokergoo/ComplexHeatmap
+library(ggbiplot)
 theme_set(theme_minimal())
-library("ggbiplot")
 cat("\014")
 BPColor     <- c( "#2F4F4F", "#882323")
 ```

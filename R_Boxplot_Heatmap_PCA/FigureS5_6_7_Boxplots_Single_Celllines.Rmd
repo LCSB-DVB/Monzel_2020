@@ -10,10 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # Preparation
 ```{r, include=FALSE}
 library(tidyverse)
-library(cytominer)
 library(RColorBrewer)
-library("gridExtra")
-library(ggplus)
+library(gridExtra)
 library(ggsignif)
 theme_set(theme_minimal())
 cat("\014")

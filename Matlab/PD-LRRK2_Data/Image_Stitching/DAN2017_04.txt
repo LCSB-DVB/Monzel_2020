@@ -1,0 +1,16 @@
+1	WT_p6_d70
+2	WT_p6_d70
+3	WT_p6_d70
+4	WT_p5_d70
+5	WT_p5_d70
+6	WT_p5_d70
+7	WT_p4_d70
+8	WT_p4_d70
+9	WT_p4_d70
+10	WT_p6_d35
+11	WT_p6_d35
+12	WT_p5_d35
+13	WT_p5_d35
+14	WT_p5_d35
+15	WT_p4_d35
+16	WT_p4_d35

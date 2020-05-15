@@ -1,0 +1,12 @@
+1	A13Mut_p9_d70
+2	A13Mut_p9_d70
+3	A13Mut_p9_d70
+4	A13Mut_p8_d70
+5	A13Mut_p6_d70
+6	A13Mut_p6_d70
+7	A13Mut_p9_d35
+8	A13Mut_p7_d35
+9	A13Mut_p6_d35
+10	A13Mut_p5_d35
+11	A13Mut_p5_d35
+12	A13Mut_p5_d35

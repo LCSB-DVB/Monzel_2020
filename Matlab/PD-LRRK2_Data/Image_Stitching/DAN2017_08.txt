@@ -1,0 +1,16 @@
+1	T4Mut_p6_d35
+2	T4Mut_p6_d35
+3	T4Mut_p6_d35
+4	T4Mut_p6_d35
+5	T4Mut_p7_d35
+6	T4Mut_p7_d35
+7	T4Mut_p5_d35
+8	T4Mut_p5_d35
+9	T4Mut_p5_d35
+10	T4GC_p6_d35
+11	T4GC_p6_d35
+12	T4GC_p7_d35
+13	T4GC_p7_d35
+14	T4GC_p7_d35
+15	T4GC_p5_d35
+16	T4GC_p5_d35
