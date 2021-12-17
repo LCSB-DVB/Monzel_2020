@@ -1,0 +1,7 @@
+The code was written on Mac, to make it work on Windows use:
+mc.cores= ifelse(Sys.info()["sysname"] == "Windows",1,detectCores() - 1) 
+instead of:
+mc.cores= detectCores() - 1
+in section ## Prediction with RandomForest
+
+For further info, contact annamonzel@gmail.com
