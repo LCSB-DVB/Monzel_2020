@@ -1,4 +1,4 @@
-**Contact info**: jens.schwamborn@uni.lu or anna.monzel@uni.lu  
+**Contact info**: jens.schwamborn@uni.lu or annamonzel@gmail.com
 
 **Please cite**: Monzel et al., Machine learning-assisted neurotoxicity prediction in human midbrain organoids, Parkinsonism Relat D (2020)  
 
